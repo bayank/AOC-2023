@@ -49,6 +49,43 @@ def string_parser(input_string, r=12, g=13, b=14):
     # Return the game ID if all quantities are within limits
     return game_id
 
+def part2(input_string):
+    # Extract Game ID
+    match_game_id = re.match(r"Game (\d+):", input_string)
+    game_id = int(match_game_id.group(1)) if match_game_id else None
+
+    # Define the possible colors
+    possible_colors = ['red', 'green', 'blue']
+
+    # Extract color data for each set
+    sets_raw = re.split(r';\s*', input_string.split(":")[1])  # Split sets using ';'
+
+    # Initialize the maximum quantity dictionary with 0 for all possible colors
+    max_quantity_per_color = {color: 0 for color in possible_colors}
+
+    # Store color data for each set in a list of dictionaries
+    color_data_sets = []
+    for set_raw in sets_raw:
+        color_data_matches = re.findall(r"(\d+) (\w+)", set_raw)
+        color_data = {color: int(quantity) for quantity, color in color_data_matches}
+        color_data_sets.append(color_data)
+
+        # Calculate the maximum quantity for each color across all sets
+        for color, quantity in color_data.items():
+            max_quantity_per_color[color] = max(max_quantity_per_color[color], quantity)
+
+    # create a new lsit and replace the missing color with 1 so we can multiply without impact
+    powerlist = []
+    for color, quantity in max_quantity_per_color.items():
+        if quantity == 0:
+            powerlist.append(1)
+        else:
+            powerlist.append(quantity)
+
+    return (powerlist[0] * powerlist[1] * powerlist[2])
+
+
+
 if __name__ == '__main__':
 
     count = 0
@@ -58,3 +95,11 @@ if __name__ == '__main__':
             count += string_parser(line)
 
     print(f"Answer part 1: {count}")
+
+    count2 = 0
+    with open("day2_input.txt", "r") as f:
+        for line in f:
+            line = line.strip()
+            count2 += part2(line)
+
+    print(f"Answer part 2: {count2}")
